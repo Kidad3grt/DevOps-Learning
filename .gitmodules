@@ -1,0 +1,6 @@
+[submodule "procurement-app--frontend"]
+	path = procurement-app--frontend
+	url = https://github.com/Kidad3grt/procurement-app--frontend.git
+[submodule "procurement-app--backend"]
+	path = procurement-app--backend
+	url = https://github.com/Kidad3grt/procurement-app--backend.git
