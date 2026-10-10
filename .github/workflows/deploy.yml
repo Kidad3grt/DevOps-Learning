@@ -84,14 +84,14 @@ jobs:
         with:
           context: ./procurement-app--backend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/divcon-backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/procurementapp-backend:latest
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./procurement-app--frontend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/divcon-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/procurementapp-frontend:latest
 
   # ── Job 3: Deploy to AWS (push to main only) ─────────────────────
   deploy:
