@@ -111,4 +111,4 @@ jobs:
             git pull origin main
             docker compose pull
             docker compose up -d
-            docker compose exec -T backend python manage.py migrate
+            docker image prune -f
