@@ -1,0 +1,70 @@
+services:
+
+  # ── PostgreSQL ───────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-procurement_db}
+      POSTGRES_USER:     ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Kidadgrat001}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-procurement_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+    - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Django backend (Daphne) ──────────────────────────────
+  backend:
+    build: ./backend
+    restart: always
+    env_file: .env
+    environment:
+      DB_HOST:    db
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"     # directly accessible at localhost:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - static_files:/app/staticfiles
+      - media_files:/app/media
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
+
+  # ── React web frontend ───────────────────────────────────
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:80"       # accessible at localhost:3000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  static_files:
+  media_files:
